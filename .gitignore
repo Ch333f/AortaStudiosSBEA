@@ -1,0 +1,7 @@
+# ignore file/directory
+.env
+__pycache__
+.python-version
+
+
+# un-ignore file/directory
