@@ -1,0 +1,10 @@
+fastapi==0.95.2
+uvicorn[standard]==0.22.0
+SQLAlchemy==2.0.19
+asyncpg==0.28.0
+databases==0.9.0
+redis>=4.2.0
+psycopg2-binary==2.9.7
+httpx==0.24.1
+pytest==7.4.0
+pytest-asyncio==0.22.0
