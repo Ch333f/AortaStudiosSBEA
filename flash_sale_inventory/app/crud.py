@@ -5,7 +5,7 @@ from app.redis_lock import redis
 import os
 
 
-RESERVATION_TTL_SECONDS = int(os.getenv("RESERVATION_TTL_SECONDS", "300"))
+RESERVATION_TTL_SECONDS = int(os.getenv("RESERVATION_TTL_SECONDS"))
 
 
 async def create_reservation(sku: str, user_id: str):
@@ -124,7 +124,7 @@ def expire_reservation(reservation_id: str):
             return True
         except Exception:
             tx.rollback()
-            
+
             raise
     finally:
         db.close()

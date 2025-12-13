@@ -6,8 +6,8 @@ import uuid
 import os
 
 
-API = os.getenv("API_URL", "http://localhost:8000")
-CONCURRENCY = int(os.getenv("CONCURRENCY", "10000"))
+API = os.getenv("API_URL")
+CONCURRENCY = int(os.getenv("CONCURRENCY"))
 SEM = asyncio.Semaphore(200)  # tune this
 
 
