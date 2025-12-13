@@ -23,12 +23,12 @@ Your GitHub repository should include:
 **1. Working Code**
 *   Runnable implementation of your solution
 *   Tests (unit, integration, or load tests as you see fit)<br />
-**2.** [**README.md**](http://README.md)
+**2\.** [**README.md**](http://README.md)
 *   Instructions to run your solution locally
 *   Setup requirements and dependencies
 *   Any assumptions you made
 *   (Optional) Documentation of load testing results or performance benchmarks<br />
-**3. Architecture Documentation:** [**`architecture.md`**](http://architecture.md)<br />
+**3\. Architecture Documentation:** [**`architecture.md`**](http://architecture.md)<br />
 This file should contain:
 *   **Data Model:** Your data structures, schemas, and storage approach
 *   **Concurrency Strategy:** How you handle race conditions and concurrent access
@@ -228,7 +228,7 @@ We value clear communication as much as clean code. Please follow these steps to
     *   A quick demo of the system answering the test query.
     *   A brief code walkthrough highlighting your architectural choices (e.g., _"Here is why I chose Hybrid Search over pure vectors..."_).
     *   Mention which "Bonus Challenges" you attempted.
-    
+
 ### 3. Final Handoff
 *   Send an email to [info@aortastudios.com](mailto:info@aortastudios.com) to confirm your submission.
 *   Please include:
