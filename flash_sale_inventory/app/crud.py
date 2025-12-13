@@ -83,3 +83,48 @@ async def create_reservation(sku: str, user_id: str):
             pass
 
         db.close()
+
+
+def expire_reservation(reservation_id: str):
+    """
+    Called by background cleanup when TTL expired:
+    - If reservation still RESERVED -> mark EXPIRED and increment product.available_qty
+    Use SELECT FOR UPDATE to avoid races with purchase.
+    """
+    db = SessionLocal()
+
+    try:
+        tx = db.begin()
+
+        try:
+            stmt = select(reservations).where(reservations.c.id == reservation_id).with_for_update()
+            row = db.execute(stmt).fetchone()
+
+            if not row:
+                tx.rollback()
+
+                return False
+            
+            if row.status != ReservationStatus.RESERVED:
+                tx.rollback()
+
+                return False
+            
+            # mark expired
+            upd = reservations.update().where(reservations.c.id == reservation_id).values(status=ReservationStatus.EXPIRED)
+
+            db.execute(upd)
+
+            # increment product qty
+            upd2 = update(products).where(products.c.id == row.product_id).values(available_qty=products.c.available_qty + 1)
+
+            db.execute(upd2)
+            tx.commit()
+
+            return True
+        except Exception:
+            tx.rollback()
+            
+            raise
+    finally:
+        db.close()
