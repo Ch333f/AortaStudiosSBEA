@@ -23,12 +23,14 @@ Your GitHub repository should include:
 **1. Working Code**
 *   Runnable implementation of your solution
 *   Tests (unit, integration, or load tests as you see fit)<br />
-**2\.** [**README.md**](http://README.md)
+
+**2.** [**README.md**](http://README.md)
 *   Instructions to run your solution locally
 *   Setup requirements and dependencies
 *   Any assumptions you made
 *   (Optional) Documentation of load testing results or performance benchmarks<br />
-**3\. Architecture Documentation:** [**`architecture.md`**](http://architecture.md)<br />
+
+**3. Architecture Documentation:** [**`architecture.md`**](http://architecture.md)<br />
 This file should contain:
 *   **Data Model:** Your data structures, schemas, and storage approach
 *   **Concurrency Strategy:** How you handle race conditions and concurrent access
@@ -90,16 +92,19 @@ Your solution must handle:<br />
 *   Purchase completion
 *   Inventory availability checks
 *   Prevention of race conditions and overselling<br />
+
 **Edge Cases:**
 *   User reserves an item but never completes purchase (item returns after 5 minutes)
 *   User completes purchase at exactly the 5:00 minute mark
 *   Multiple users attempting to reserve/purchase the last item simultaneously
 *   System receives thousands of concurrent requests<br />
+
 **API Design:** Provide endpoints (REST, GraphQL, gRPC - your choice) that support:
 *   Reserving inventory
 *   Completing a purchase
 *   Checking available inventory
 *   Any other operations you deem necessary<br />
+
 **Concurrency Strategy:** Demonstrate how your locking/synchronization strategy prevents inventory from going negative under heavy load.
 
 ### What We Want to See
@@ -137,17 +142,20 @@ Your solution must provide:<br />
 *   Comment storage with precise timestamp anchoring (sub-second accuracy)
 *   Synchronization logic that delivers comments at correct video timestamps regardless of network latency
 *   Comment history retrieval for new viewers or those seeking through video<br />
+
 **Edge Cases:**
 *   New viewer joins mid-video and needs comment history synchronized to their playback position
 *   Viewer pauses video - comments should not accumulate, but appear when they resume
 *   Viewer seeks backward or forward through video
 *   Network latency causes comment to arrive late (should still appear at correct timestamp)
 *   Multiple comments posted at the same timestamp<br />
+
 **API Design:** Provide a real-time communication interface and any supporting endpoints you need:
 *   Connection management (joining/leaving classrooms)
 *   Comment submission with timestamp
 *   Comment retrieval/synchronization
 *   Any other operations necessary<br />
+
 **Synchronization Strategy:** Demonstrate how your system ensures comments appear at correct timestamps despite:
 *   Variable network latency between server and clients
 *   Different video playback states across clients
@@ -182,6 +190,7 @@ If you complete both scenarios and want to showcase additional skills, consider:
 *   Security: Rate limiting, authentication, input validation
 *   Deployment: Containerization, infrastructure-as-code
 *   Documentation: API documentation, architecture diagrams<br />
+
 **Advanced Features:**
 *   Distributed deployment considerations
 *   Database schema optimization
@@ -195,21 +204,21 @@ If you complete both scenarios and want to showcase additional skills, consider:
 3. Submit the repository link<br />
 We look forward to reviewing your work. Good luck! 🎯<br />
 
-**The Task**:
+**The Task**:<br />
 Build the WebSocket Server that orchestrates playback and comment syncing.<br />
 **Technical Requirements:**
 1. Server-Authoritative Time: The server must broadcast a Scheduled Timestamp (e.g., "Start playing at Server Time 10:00:05.500") to allow clients to compensate for latency.
-2. Temporal Indexing: Design a data structure for storing comments that allows for $O(1)$ or $O(\\log n)$ retrieval of comments relevant to a specific video timestamp.
+2. Temporal Indexing: Design a data structure for storing comments that allows for \$O(1)$ or \$O(\log n)\$ retrieval of comments relevant to a specific video timestamp.
 
 ### 📝 Submission Guidelines
 1. The Code
 *   Provide a link to a Private GitHub Repo (please invite us).
-*   Do not generate a full framework boilerplate (no auth, no frontend). Focus only on the logic requested.<br />
+*   Do not generate a full framework boilerplate (no auth, no frontend). Focus only on the logic requested.
 2. The Documentation ([README.md](http://README.md))<br />
 Your README must include a "Design Decisions" section answering:
 *   Why did you choose this specific database isolation level or locking strategy?
 *   What are the trade-offs of your approach?
-*   What is the Time Complexity (Big O) of your core algorithm?<br />
+*   What is the Time Complexity (Big O) of your core algorithm?
 3. (Recommended) Video Walkthrough
 *   A short video (Loom/Youtube) walking through your logic. Focus on the _why_, not the _what_.
 *   Note: You do not need to be on camera; audio commentary over a screen recording is sufficient.
