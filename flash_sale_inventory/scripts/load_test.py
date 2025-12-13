@@ -7,7 +7,7 @@ import os
 
 
 API = os.getenv("API_URL", "http://localhost:8000")
-CONCURRENCY = int(os.getenv("CONCURRENCY", "1000"))
+CONCURRENCY = int(os.getenv("CONCURRENCY", "10000"))
 SEM = asyncio.Semaphore(200)  # tune this
 
 
