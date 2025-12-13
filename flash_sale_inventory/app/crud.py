@@ -1,7 +1,7 @@
 from sqlalchemy import select, update
 from app.db import SessionLocal
 from app.models import products, reservations, ReservationStatus
-from app.redis_lock import RedisLock, redis
+from app.redis_lock import redis
 import os
 
 
@@ -11,13 +11,10 @@ RESERVATION_TTL_SECONDS = int(os.getenv("RESERVATION_TTL_SECONDS", "300"))
 async def create_reservation(sku: str, user_id: str):
     """
     Reserve one unit atomically:
-    - Acquire redis lock per sku
     - Start db transaction, SELECT FOR UPDATE the product row
     - If available_qty > 0, decrement and insert reservation with expires_at
-    - Release redis lock
     """
     db = SessionLocal()
-    lock = RedisLock(f"lock:sku:{sku}", ttl_ms=2000)
 
 
     import time as _time
@@ -26,12 +23,6 @@ async def create_reservation(sku: str, user_id: str):
         pass
     
     try:
-        # Acquire distributed lock to limit race across app instances
-        ok = await lock.acquire(timeout=2.0)
-
-        if not ok:
-            raise Exception("could not acquire lock, try again")
-
         tx = db.begin()
 
         try:
@@ -72,7 +63,6 @@ async def create_reservation(sku: str, user_id: str):
 
             # store mapping in Redis to allow faster expiry/cleanup
             # Key: reservation:{reservation_id} -> product_id , expire ttl
-
             await redis.set(
                 f"reservation:{res_id}",
                 f"{row.id}",
@@ -88,8 +78,8 @@ async def create_reservation(sku: str, user_id: str):
             pass
     finally:
         try:
-            await lock.release()
+            pass
         except Exception:
             pass
-        
+
         db.close()
