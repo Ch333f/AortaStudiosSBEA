@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from app import models
 from app.db import engine
-from app.crud import create_reservation, complete_purchase
+from app.crud import create_reservation, complete_purchase, get_inventory
 from app.background import cleanup_task
 import asyncio
 import os
@@ -56,3 +56,13 @@ async def purchase(req: PurchaseRequest):
         raise HTTPException(status_code=400, detail=result["error"])
     
     return result
+
+
+@app.get("/inventory/{sku}")
+def inventory(sku: str):
+    info = get_inventory(sku)
+
+    if info is None:
+        raise HTTPException(status_code=404, detail="sku_not_found")
+    
+    return {"product_id": info["product_id"], "sku": info["sku"], "available_qty": info["available_qty"]}
