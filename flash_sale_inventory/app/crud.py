@@ -85,6 +85,59 @@ async def create_reservation(sku: str, user_id: str):
         db.close()
 
 
+async def complete_purchase(reservation_id: str, user_id: str):
+    """
+    Mark reservation as purchased if still RESERVED and owned by user.
+    This operation should be idempotent and atomic.
+    """
+    db = SessionLocal()
+
+    try:
+        tx = db.begin()
+
+        try:
+            stmt = select(reservations).where(reservations.c.id == reservation_id).with_for_update()
+            row = db.execute(stmt).fetchone()
+
+            if not row:
+                tx.rollback()
+
+                return {"error": "reservation_not_found"}
+            
+            if row.user_id != user_id:
+                tx.rollback()
+
+                return {"error": "invalid_user"}
+            
+            if row.status != ReservationStatus.RESERVED:
+                # already purchased or expired
+                tx.rollback()
+
+                return {"error": f"cannot_purchase_status_{row.status}"}
+            
+            # mark purchased
+            upd = reservations.update().where(reservations.c.id == reservation_id).values(status=ReservationStatus.PURCHASED)
+
+            db.execute(upd)
+            tx.commit()
+
+            # remove redis key to avoid cleanup returning inventory later
+            await redis.delete(f"reservation:{reservation_id}")
+
+            return {"ok": True, "message": "purchase completed successfully"}
+        except Exception:
+            tx.rollback()
+
+            raise
+    finally:
+        try:
+            pass
+        except Exception:
+            pass
+
+        db.close()
+
+
 def expire_reservation(reservation_id: str):
     """
     Called by background cleanup when TTL expired:
