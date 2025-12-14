@@ -32,23 +32,17 @@ async def reserve(req: ReserveRequest):
     Try to reserve one unit for user_id on SKU.
     Returns reservation_id and expires_at (epoch ms) or error.
     """
-    try:
-        result = await create_reservation(req.sku, req.user_id)
+    result = await create_reservation(req.sku, req.user_id)
 
-        if result.get("error"):
-            raise HTTPException(status_code=400, detail=result["error"])
+    if result.get("error"):
+        raise HTTPException(status_code=400, detail=result["error"])
             
-        # store in active_reservations for cleanup detection
-        res_id = result["reservation_id"]
+    # store in active_reservations for cleanup detection
+    res_id = result["reservation_id"]
 
-        await redis.sadd("active_reservations", res_id)
+    await redis.sadd("active_reservations", res_id)
 
-        # ensure a key with TTL exists
-        await redis.set(f"reservation:{res_id}", f"{result['product_id']}", ex=RESERVATION_TTL_SECONDS)
+    # ensure a key with TTL exists
+    await redis.set(f"reservation:{res_id}", f"{result['product_id']}", ex=RESERVATION_TTL_SECONDS)
 
-        return result
-    except Exception as e:
-        if "could not acquire lock" in str(e):
-            raise HTTPException(status_code=409, detail="Item is already being reserved")
-        
-        raise
+    return result
