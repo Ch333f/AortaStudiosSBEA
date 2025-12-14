@@ -3,8 +3,11 @@ import asyncio
 import httpx
 import time
 import uuid
+from dotenv import load_dotenv
 import os
 
+
+load_dotenv()  # load variables from .env
 
 API = os.getenv("API_URL")
 CONCURRENCY = int(os.getenv("CONCURRENCY"))
