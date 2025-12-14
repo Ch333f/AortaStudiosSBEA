@@ -22,8 +22,13 @@ services:
       - postgres
       - redis
     environment:
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/flashsaleinventory
-      REDIS_URL: redis://redis:6379/0
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+      RESERVATION_TTL_SECONDS: ${RESERVATION_TTL_SECONDS}
+      CLEANUP_INTERVAL_SECONDS: ${CLEANUP_INTERVAL_SECONDS}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      API_URL: ${API_URL}
+      CONCURRENCY: ${CONCURRENCY}
       PYTHONUNBUFFERED: "1"
     ports:
       - "9000:8000"
