@@ -13,3 +13,8 @@ app = FastAPI(title="Flash Sale Inventory Service")
 @app.on_event("startup")
 async def start_background_tasks():
     app.state.cleanup = asyncio.create_task(cleanup_task())
+
+
+@app.get("/")
+def root():
+    return {"status": "ok"}
