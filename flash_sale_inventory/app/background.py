@@ -4,7 +4,6 @@ from app.crud import expire_reservation
 from redis.asyncio import Redis
 
 
-REDIS_URL = os.getenv("REDIS_URL")
 CLEANUP_INTERVAL_SECONDS = int(os.getenv("CLEANUP_INTERVAL_SECONDS"))
 redis = Redis(host="redis", port=6379, decode_responses=True)
 

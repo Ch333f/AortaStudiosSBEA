@@ -4,7 +4,6 @@ import uuid
 from redis.asyncio import Redis
 
 
-REDIS_URL = os.getenv("REDIS_URL")
 redis = Redis(host="redis", port=6379, decode_responses=True)
 
 
