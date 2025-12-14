@@ -81,8 +81,20 @@ For horizontal scaling across multiple database shards or regions, Redis-based d
 - **Alternative: purely Redis-based inventory** — very fast (INCR/DECR + Lua) but loses durable audit history if not synced to DB.
 - **Chosen approach** strikes a balance: durable audit in Postgres + Redis for low-latency locking & TTL.
 
+My initial design used a Redis-based distributed lock per SKU. Load testing revealed severe throughput degradation and fairness issues under high concurrency due to lock timeout contention. Since PostgreSQL row-level locking via SELECT FOR UPDATE already provides ACID guarantees and fair queuing, the Redis lock was removed from the reservation path. Redis is retained only for TTL tracking and cleanup of expired reservations.
+```
+  DB lock = simpler but lower write throughput
+  Redis = higher throughput but weaker consistency unless carefully designed
+```
+
 ## Security Concerns & Mitigations
 - Add authentication / authorization to endpoints.
 - Add rate-limiting to avoid spam.
 - Validate and sanitize inputs.
 - Monitor Redis & Postgres metrics (latency, slow queries).
+
+## Load Testing Observations
+
+- Client-side saturation at extreme concurrency
+- Mitigated using bounded concurrency
+- Server remains consistent under load
