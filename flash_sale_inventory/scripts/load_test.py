@@ -24,11 +24,19 @@ async def worker(i, sku, client):
             if resp.status_code == 200:
                 data = resp.json()
                 
-                print(f"[{i}] reserved -> {data['reservation_id']}")
+                print(f'[{i}] reserved -> {{"user_id": {user_id}, reservation_id": {data["reservation_id"]}}}')
 
                 # optionally simulate purchase:
                 # attempt to purchase immediately
-                # await client.post(f"{API}/purchase", json={"reservation_id": data['reservation_id'], "user_id": user_id})
+                if os.getenv("PURCHASE_IMMEDIATELY"):
+                    p_resp = await client.post(f"{API}/purchase", json={"reservation_id": data['reservation_id'], "user_id": user_id})
+
+                    if p_resp.status_code == 200:
+                        p_data = p_resp.json()
+
+                        print(f'[{i}] purchased -> {p_data["message"]}')
+                    else:
+                        print(f'[{i}] purchase failed -> {p_resp.status_code} {p_resp.text}')
             else:
                 print(f"[{i}] failed -> {resp.status_code} {resp.text}")
         except Exception as e:
