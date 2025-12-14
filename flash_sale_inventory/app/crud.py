@@ -8,6 +8,21 @@ import os
 RESERVATION_TTL_SECONDS = int(os.getenv("RESERVATION_TTL_SECONDS"))
 
 
+def get_inventory(sku: str):
+    db = SessionLocal()
+    
+    try:
+        stmt = select(products).where(products.c.sku == sku)
+        row = db.execute(stmt).fetchone()
+
+        if row is None:
+            return None
+        
+        return {"product_id": row.id, "sku": row.sku, "available_qty": row.available_qty}
+    finally:
+        db.close()
+
+
 async def create_reservation(sku: str, user_id: str):
     """
     Reserve one unit atomically:
