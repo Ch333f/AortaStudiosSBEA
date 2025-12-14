@@ -1,12 +1,12 @@
 from fastapi import FastAPI, HTTPException
 from app import models
 from app.db import engine
-from app.crud import create_reservation
+from app.crud import create_reservation, complete_purchase
 from app.background import cleanup_task
 import asyncio
 import os
 from redis.asyncio import Redis
-from app.schemas import ReserveRequest
+from app.schemas import ReserveRequest, PurchaseRequest
 
 
 models.metadata.create_all(bind=engine)
@@ -45,4 +45,14 @@ async def reserve(req: ReserveRequest):
     # ensure a key with TTL exists
     await redis.set(f"reservation:{res_id}", f"{result['product_id']}", ex=RESERVATION_TTL_SECONDS)
 
+    return result
+
+
+@app.post("/purchase")
+async def purchase(req: PurchaseRequest):
+    result = await complete_purchase(req.reservation_id, req.user_id)
+
+    if result.get("error"):
+        raise HTTPException(status_code=400, detail=result["error"])
+    
     return result
