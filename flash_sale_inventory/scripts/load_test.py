@@ -12,6 +12,13 @@ load_dotenv()  # load variables from .env
 API = os.getenv("API_URL")
 CONCURRENCY = int(os.getenv("CONCURRENCY"))
 SEM = asyncio.Semaphore(200)  # tune this
+results = {
+    "reserved": 0,
+    "r_failed": 0,
+    "purchased": 0,
+    "p_failed": 0,
+    "exceptions": 0,
+}
 
 
 async def worker(i, sku, client):
@@ -35,12 +42,22 @@ async def worker(i, sku, client):
                         p_data = p_resp.json()
 
                         print(f'[{i}] purchased -> {p_data["message"]}')
+
+                        results["purchased"] += 1
                     else:
                         print(f'[{i}] purchase failed -> {p_resp.status_code} {p_resp.text}')
+
+                        results["p_failed"] += 1
+
+                results["reserved"] += 1
             else:
                 print(f"[{i}] failed -> {resp.status_code} {resp.text}")
+
+                results["r_failed"] += 1
         except Exception as e:
             print(f"[{i}] exception {type(e).__name__}: {e}")
+
+            results["exceptions"] += 1
 
 
 async def run():
@@ -53,6 +70,8 @@ async def run():
             tasks.append(asyncio.create_task(worker(i, sku, client)))
 
         await asyncio.gather(*tasks)
+
+        return results
 
 
 if __name__ == "__main__":
