@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Synchronized Classroom</title>
+  </head>
+  <body>
+    <h3>Synchronized Classroom</h3>
+
+    <video id="video" width="600" controls autoplay loop muted>
+      <source
+        src="https://cdn.pixabay.com/video/2022/07/14/124140-730515109_tiny.mp4"
+        type="video/mp4"
+      />
+    </video>
+
+    <br /><br />
+
+    <input id="commentInput" placeholder="Add comment" required />
+    <button
+      onclick='document.getElementById("commentInput").value.length ? sendComment() : ""'
+    >
+      Send
+    </button>
+
+    <ul id="comments"></ul>
+
+    <script>
+      const userId = "student_" + Math.floor(Math.random() * 1000);
+      const ws = new WebSocket(`ws://localhost:9000/ws/${userId}`);
+      let serverOffset = 0;
+
+      const video = document.getElementById("video");
+      const commentsList = document.getElementById("comments");
+
+      let scheduledTimers = [];
+      let isPaused = false;
+
+      /* -------------------------------
+        WebSocket Handlers
+      -------------------------------- */
+      ws.onmessage = (e) => {
+        const msg = JSON.parse(e.data);
+
+        if (msg.type === "sync") {
+          serverOffset = msg.server_time - Date.now() / 1000;
+        }
+
+        if (msg.type === "comment") {
+          scheduleComment(msg.comment);
+        }
+
+        if (msg.type === "history") {
+          clearComments();
+          msg.comments.forEach(scheduleComment);
+        }
+      };
+
+      /* -------------------------------
+        Video Event Hooks
+      -------------------------------- */
+
+      // New viewer joins or refreshes
+      video.addEventListener("loadedmetadata", () => {
+        requestHistory(video.currentTime);
+      });
+
+      // Pause playback
+      video.addEventListener("pause", () => {
+        isPaused = true;
+        clearScheduledTimers();
+      });
+
+      // Resume playback
+      video.addEventListener("play", () => {
+        isPaused = false;
+        requestHistory(video.currentTime);
+      });
+
+      // Seek backward or forward
+      video.addEventListener("seeked", () => {
+        clearScheduledTimers();
+        clearComments();
+        requestHistory(video.currentTime);
+      });
+
+      /* -------------------------------
+        Comment Logic
+      -------------------------------- */
+      function sendComment() {
+        if (ws.readyState !== WebSocket.OPEN) return;
+
+        ws.send(
+          JSON.stringify({
+            type: "comment",
+            video_ts: video.currentTime,
+            message: document.getElementById("commentInput").value,
+            author: userId,
+          })
+        );
+
+        document.getElementById("commentInput").value = "";
+      }
+
+      function requestHistory(videoTs) {
+        ws.send(
+          JSON.stringify({
+            type: "seek",
+            video_ts: videoTs,
+          })
+        );
+      }
+
+      function scheduleComment(comment) {
+        if (comment.video_timestamp > video.duration) return;
+
+        const delay = (comment.video_timestamp - video.currentTime) * 1000;
+
+        if (delay <= 0) {
+          renderComment(comment);
+        } else if (!isPaused) {
+          const timer = setTimeout(() => {
+            renderComment(comment);
+          }, delay);
+
+          scheduledTimers.push(timer);
+        }
+      }
+
+      function renderComment(comment) {
+        const li = document.createElement("li");
+
+        li.textContent = `[${comment.video_timestamp.toFixed(2)}] ${
+          comment.author
+        }: ${comment.message}`;
+        commentsList.appendChild(li);
+      }
+
+      /* -------------------------------
+        Utilities
+      -------------------------------- */
+      function clearScheduledTimers() {
+        scheduledTimers.forEach(clearTimeout);
+        scheduledTimers = [];
+      }
+
+      function clearComments() {
+        commentsList.innerHTML = "";
+      }
+    </script>
+  </body>
+</html>
