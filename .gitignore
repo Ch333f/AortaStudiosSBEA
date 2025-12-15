@@ -1,5 +1,6 @@
 # ignore file/directory
 .env
+.env.docker
 __pycache__
 .python-version
 .pytest_cache
