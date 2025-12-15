@@ -26,7 +26,7 @@
 
     <script>
       const userId = "student_" + Math.floor(Math.random() * 1000);
-      const ws = new WebSocket(`ws://localhost:9000/ws/${userId}`);
+      const ws = new WebSocket(`ws://localhost:8000/ws/${userId}`);
       let serverOffset = 0;
 
       const video = document.getElementById("video");
